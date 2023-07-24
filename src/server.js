@@ -4,7 +4,7 @@ const Hapi = require('@hapi/hapi');
 const ClientError = require('./exceptions/ClientError');
 const albums = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
-const AlbumsValidator = require('./validator/albums');
+const AlbumsValidator = require('./validator');
 
 const init = async () => {
   const albumsService = new AlbumsService();
