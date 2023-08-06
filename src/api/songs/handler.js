@@ -9,7 +9,7 @@ class SongsHandler {
   }
 
   async postSongHandler(request, h) {
-    this._validator.validateSongPayLoad(request.payload);
+    this._validator.validateSongPayload(request.payload);
 
     const { title, year, genre, performer, duration, albumId } = request.payload;
 
@@ -62,7 +62,7 @@ class SongsHandler {
   }
 
   async putSongByIdHandler(request) {
-    this._validator.validateSongPayLoad(request.payload);
+    this._validator.validateSongPayload(request.payload);
 
     const { id } = request.params;
 

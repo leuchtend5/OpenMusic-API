@@ -9,7 +9,7 @@ class AlbumsHandler {
   }
 
   async postAlbumHandler(request, h) {
-    this._validator.validateAlbumPayLoad(request.payload);
+    this._validator.validateAlbumPayload(request.payload);
 
     const { name, year } = request.payload;
 
@@ -44,7 +44,7 @@ class AlbumsHandler {
   }
 
   async putAlbumByIdHandler(request) {
-    this._validator.validateAlbumPayLoad(request.payload);
+    this._validator.validateAlbumPayload(request.payload);
 
     const { id } = request.params;
 
