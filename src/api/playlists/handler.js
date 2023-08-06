@@ -29,12 +29,29 @@ class PlaylistsHandler {
     return response;
   }
 
-  async getPlaylistsHandler() {
-    //
+  async getPlaylistsHandler(request) {
+    const { id: credentialId } = request.auth.credentials;
+    const playlists = await this._service.getPlaylists(credentialId);
+
+    return {
+      status: 'success',
+      data: {
+        playlists,
+      },
+    };
   }
 
-  async deletePlaylistByIdHandler() {
-    //
+  async deletePlaylistByIdHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._service.verifyPlaylistOwner(id, credentialId);
+    await this._service.deletePlaylistById(id);
+
+    return {
+      status: 'success',
+      message: 'Playlist berhasil dihapus',
+    };
   }
 
   async postSongToPlaylistHandler() {
