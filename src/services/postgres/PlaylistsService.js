@@ -3,7 +3,7 @@ const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
-const { mapPlaylistDBToModel } = require('../../utils/index');
+const { mapPlaylistDBToModel, mapSongDBToModel } = require('../../utils/index');
 
 class PlaylistsService {
   constructor() {
@@ -72,16 +72,46 @@ class PlaylistsService {
     }
   }
 
-  async addSongToPlaylist() {
-    //
+  async addSongToPlaylist(playlistId, songId) {
+    await this.verifyExistingSong(songId);
+
+    const id = `playlist_songs-${nanoid(16)}`;
+    const query = {
+      text: 'INSERT INTO playlist_songs VALUES ($1, $2, $3) RETURNING id',
+      values: [id, playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows[0].id) {
+      throw new InvariantError('Lagu gagal ditambahkan');
+    }
   }
 
-  async getSongsFromPlaylist() {
-    //
+  async getSongsFromPlaylist(playlistId) {
+    const query = {
+      text: `SELECT songs.* FROM songs
+      JOIN playlist_songs ON songs.id = playlist_songs.song_id
+      WHERE playlist_songs.playlist_id = $1`,
+      values: [playlistId],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows.map(mapSongDBToModel);
   }
 
-  async deleteSongFromPlaylist() {
-    //
+  async deleteSongFromPlaylist(playlistId, songId) {
+    const query = {
+      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
+      values: [playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError('Lagu gagal dihapus. Id lagu tidak ada didalam Playlist');
+    }
   }
 
   async verifyPlaylistOwner(id, owner) {
@@ -103,8 +133,27 @@ class PlaylistsService {
     }
   }
 
-  async verifyPlaylistAccess() {
-    //
+  async verifyPlaylistAccess(playlistId, userId) {
+    // try {
+    //   await this.verifyPlaylistOwner(playlistId, userId);
+    // } catch (error) {
+    //   if (error instanceof NotFoundError) {
+    //     throw error;
+    //   }
+    // }
+  }
+
+  async verifyExistingSong(songId) {
+    const query = {
+      text: 'SELECT * FROM songs WHERE id = $1',
+      values: [songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Lagu tidak ditemukan');
+    }
   }
 }
 

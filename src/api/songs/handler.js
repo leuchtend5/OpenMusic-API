@@ -81,7 +81,7 @@ class SongsHandler {
 
     return {
       status: 'success',
-      message: 'Album berhasil dihapus',
+      message: 'Lagu berhasil dihapus',
     };
   }
 }
