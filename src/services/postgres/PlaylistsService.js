@@ -6,8 +6,9 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 const { mapPlaylistDBToModel, mapSongDBToModel } = require('../../utils/index');
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationsService) {
     this._pool = new Pool();
+    this._collaborationsService = collaborationsService;
   }
 
   async addPlaylist(name, owner) {
@@ -32,7 +33,8 @@ class PlaylistsService {
       text: `SELECT playlists.*, users.username
       FROM playlists
       LEFT JOIN users ON users.id = playlists.owner
-      WHERE playlists.owner = $1`,
+      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
     };
 
@@ -134,13 +136,19 @@ class PlaylistsService {
   }
 
   async verifyPlaylistAccess(playlistId, userId) {
-    // try {
-    //   await this.verifyPlaylistOwner(playlistId, userId);
-    // } catch (error) {
-    //   if (error instanceof NotFoundError) {
-    //     throw error;
-    //   }
-    // }
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+
+      try {
+        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+      } catch {
+        throw error;
+      }
+    }
   }
 
   async verifyExistingSong(songId) {
