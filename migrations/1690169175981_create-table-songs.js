@@ -26,7 +26,6 @@ exports.up = (pgm) => {
     },
     album_id: {
       type: 'TEXT',
-      // references: 'albums(id)',
     },
   });
 };

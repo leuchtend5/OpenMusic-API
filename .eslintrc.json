@@ -15,6 +15,7 @@
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
     "object-curly-newline": "off",
-    "import/no-extraneous-dependencies": "off"
+    "import/no-extraneous-dependencies": "off",
+    "newline-per-chained-call": "off"
   }
 }
